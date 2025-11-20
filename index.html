@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Masterpiece Stories — Koleksi Kisah Manusia</title>
+  <meta name="description" content="Kisah-kisah pendek tentang kehidupan sehari-hari. Mirip Human of New York, fokus pada cerita manusia dan foto." />
+  <meta property="og:title" content="Masterpiece Stories" />
+  <meta property="og:description" content="Kumpulan kisah manusia yang menyentuh, ditulis dan difoto." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://placehold.co/1200x630" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{--bg:#f5f5f5;--text:#222;--card:#fff;--accent:#2ecc71}
+    .dark{--bg:#111;--text:#f3f3f3;--card:#1c1c1c}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg);color:var(--text);line-height:1.5}
+
+    header{background:var(--card);position:sticky;top:0;z-index:30;border-bottom:1px solid rgba(0,0,0,0.06)}
+    .header-inner{max-width:1100px;margin:0 auto;padding:24px 20px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+    .brand{font-weight:700;font-size:20px}
+    nav a{margin-left:14px;color:var(--text);text-decoration:none}
+
+    main{max-width:1100px;margin:28px auto;padding:0 20px;display:grid;grid-template-columns:1fr 320px;gap:28px}
+
+    /* Story grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+    article.story-card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,0.06);cursor:pointer;display:flex;flex-direction:column;transition:transform .18s ease}
+    article.story-card:hover{transform:translateY(-6px)}
+    .story-thumb{width:100%;height:190px;object-fit:cover}
+    .story-body{padding:16px}
+    .story-body h3{margin:0 0 8px;font-size:18px}
+    .story-body p{margin:0;color:rgba(0,0,0,0.7)}
+
+    /* sidebar/profile */
+    aside.profile{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .avatar{width:110px;height:110px;border-radius:999px;object-fit:cover;margin:0 auto 12px;display:block}
+    .ig-link{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#E1306C;color:white;border-radius:8px;text-decoration:none}
+
+    /* upload */
+    section#uploadSection{margin-top:22px}
+    form input,form textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:10px;background:transparent}
+    form button{background:var(--accent);color:white;padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
+
+    /* detail popup */
+    #detailPopup{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:60;padding:20px}
+    #detailPopup.show{display:flex}
+    #detailBox{width:100%;max-width:900px;background:var(--card);border-radius:12px;overflow:auto;max-height:90vh;padding:20px;position:relative}
+    #detailBox img{width:100%;height:360px;object-fit:cover;border-radius:8px;margin-bottom:12px}
+    #detailClose{position:absolute;right:18px;top:18px;background:#c0392b;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+
+    footer{margin:40px 0;text-align:center;color:#666}
+
+    @media (max-width:980px){main{grid-template-columns:1fr} aside.profile{order:2}}
+    @media (max-width:480px){#detailBox img{height:220px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">Masterpiece Stories</div>
+      <nav aria-label="Main navigation">
+        <a href="#stories">Cerita</a>
+        <a href="#upload">Tambah Cerita</a>
+      </nav>
+      <div>
+        <button id="toggleDark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="stories" id="stories">
+      <h2 id="stories" style="margin-top:0">Cerita Terbaru</h2>
+      <div class="grid" id="storyGrid" role="list">
+        <!-- cards rendered here by JS -->
+      </div>
+    </section>
+
+    <aside class="profile" aria-labelledby="profileTitle">
+      <h3 id="profileTitle">Profil Storyteller</h3>
+      <img id="profileAvatar" class="avatar" src="https://placehold.co/400x400" alt="Avatar Storyteller" />
+      <h4 id="profileName">Nama Storyteller</h4>
+      <p id="profileBio">Bio singkat tentang storyteller. Kamu bisa masukkan link Instagram di bawah ketika sudah siap.</p>
+
+      <p style="margin-top:12px"><a id="profileInstagram" class="ig-link" href="#" target="_blank" rel="noopener noreferrer"><span style="font-weight:700">@instagram</span></a></p>
+
+      <section id="uploadSection">
+        <h4>Tambah Cerita</h4>
+        <form id="storyForm">
+          <input id="title" name="title" placeholder="Judul cerita" required />
+          <textarea id="story" name="story" rows="4" placeholder="Isi cerita lengkap..." required></textarea>
+          <input id="imageUrl" name="imageUrl" placeholder="Link gambar (opsional)" />
+          <button type="submit">Tambah</button>
+        </form>
+      </section>
+    </aside>
+  </main>
+
+  <!-- detail modal -->
+  <div id="detailPopup" aria-hidden="true">
+    <div id="detailBox" role="dialog" aria-modal="true">
+      <button id="detailClose" aria-label="Tutup detail">Tutup</button>
+      <img id="detailImg" src="" alt="Gambar cerita" />
+      <h3 id="detailTitle"></h3>
+      <p id="detailAuthor" style="color:#666;margin-top:6px;margin-bottom:12px"></p>
+      <div id="detailText" style="white-space:pre-wrap"></div>
+      <p style="margin-top:12px"><a id="detailInsta" href="#" target="_blank" rel="noopener noreferrer">Instagram storyteller</a></p>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Masterpiece Stories — Created by Yoga Eko Prasetyo
+  </footer>
+
+  <script>
+    // --- data store (in-memory). Could be moved to JSON or DB later ---
+    const stories = [
+      {
+        id: crypto?.randomUUID?.() || 's1',
+        title: 'Pengemudi Ojek Online',
+        author: 'Pak Hadi',
+        img: 'https://assets.promediateknologi.id/crop/0x488:1080x1340/750x500/webp/photo/2023/04/07/THR-ojek-online-1665872766.jpg',
+        excerpt: 'Saya sudah tujuh tahun narik ojek online. Dulu saya kerja pabrik, tapi kena PHK waktu pandemi...',
+        text: `Saya sudah tujuh tahun narik ojek online. Dulu saya kerja pabrik, tapi kena PHK waktu pandemi. Awalnya bingung harus mulai dari mana. Saya cuma punya motor tua dan tabungan yang hampir habis.
+
+Di jalan saya belajar banyak hal: ketemu orang baik, orang marah, orang cerita banyak hal, bahkan kadang ada yang curhat persoalan hidupnya. Lucunya, justru dari kursi belakang motor saya sering denger cerita-cerita yang nggak pernah mereka ceritakan ke keluarga.
+
+Saya pernah antar ibu hamil yang suaminya kerja di luar kota. Dia bilang dia takut lahiran sendirian. Saya pelan-pelan bawanya, sambil doa dalam hati supaya selamat sampai rumah sakit.
+
+Pernah juga saya antar bapak-bapak yang ternyata baru saja di-PHK. Dia diam sepanjang jalan, terus tiba-tiba bilang: 'Mas, hidup kok keras banget ya?' Saya cuma jawab: 'Iya pak… tapi kita sama-sama jalan terus.'
+
+Saya nggak kaya, tapi saya bersyukur saya masih bisa bantu orang lewat cara sederhana: nganter mereka dengan selamat.`,
+        instagram: ''
+      },
+      {
+        id: crypto?.randomUUID?.() || 's2',
+        title: 'Tukang Becak',
+        author: 'Pak Suyadi',
+        img: 'https://placehold.co/800x600',
+        excerpt: 'Saya sudah narik becak sejak umur 19 tahun. Sekarang umur saya sudah lewat 50, tapi becak ini masih jadi teman saya...',
+        text: `Saya sudah narik becak sejak umur 19 tahun. Dulu pertama kali ikut bapak ke pasar, terus lama-lama belajar sendiri. Sekarang umur saya sudah lewat 50, tapi becak ini masih jadi teman saya sehari-hari.
+
+Orang bilang pekerjaan saya berat. Iya, memang berat, tapi saya sudah terbiasa. Yang bikin saya terus jalan itu bukan uangnya, tapi orang-orang yang saya temui setiap hari. Kadang ada ibu-ibu yang belanja banyak, ada anak kecil yang ketawa sepanjang jalan, ada juga orang-orang yang cuma butuh ditemenin ngobrol sebentar.
+
+Saya pernah nganter seorang kakek yang mau ke rumah sakit buat cek kesehatan. Dia cerita, dia tinggal sendirian sejak istrinya meninggal. Sepanjang jalan dia cerita tentang kenangan mereka berdua. Saya cuma bisa dengerin sambil nggowes pelan. Pas turun, dia bilang, ‘Makasih ya, Mas. Kamu sudah jagain saya sampai sini.’
+
+Ada juga waktu saya nganter seorang mahasiswa baru yang baru pertama kali datang ke kota ini. Dia bilang dia takut nyasar. Saya antar dia sampai kos, terus kasih dia tips rute jalan yang aman. Seminggu kemudian dia lewat dan manggil saya lagi cuma buat bilang terima kasih.
+
+Saya mungkin cuma tukang becak, tapi tiap hari saya lihat hidup dari jarak yang sangat dekat. Kadang orang duduk di belakang saya sambil nyembunyiin sedihnya, kadang sambil nahan tawa. Dari situ saya belajar, hidup ini nggak usah buru-buru. Yang penting kita tetap jalan, pelan tapi pasti.`,
+        instagram: ''
+      }
+    ];
+
+    // --- DOM refs ---
+    const grid = document.getElementById('storyGrid');
+    const detailPopup = document.getElementById('detailPopup');
+    const detailImg = document.getElementById('detailImg');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailAuthor = document.getElementById('detailAuthor');
+    const detailText = document.getElementById('detailText');
+    const detailInsta = document.getElementById('detailInsta');
+    const detailClose = document.getElementById('detailClose');
+
+    // render list
+    function renderStories(){
+      grid.innerHTML = '';
+      stories.slice().reverse().forEach(story => {
+        const article = document.createElement('article');
+        article.className = 'story-card';
+        article.setAttribute('role','listitem');
+        article.dataset.id = story.id;
+
+        const img = document.createElement('img'); img.className='story-thumb'; img.src = story.img; img.alt = story.title;
+        const body = document.createElement('div'); body.className='story-body';
+        const h3 = document.createElement('h3'); h3.textContent = story.title;
+        const p = document.createElement('p'); p.textContent = story.excerpt;
+
+        body.appendChild(h3); body.appendChild(p);
+        article.appendChild(img); article.appendChild(body);
+
+        // attach click
+        article.addEventListener('click', () => openDetailById(story.id));
+        grid.appendChild(article);
+      });
+    }
+
+    function openDetailById(id){
+      const s = stories.find(x => x.id === id);
+      if(!s) return;
+      detailImg.src = s.img || '';
+      detailTitle.textContent = s.title;
+      detailAuthor.textContent = s.author ? 'Oleh ' + s.author : '';
+      detailText.textContent = s.text || '';
+      detailInsta.href = s.instagram || '#';
+      detailInsta.textContent = s.instagram ? 'Instagram: ' + s.instagram.replace('https://instagram.com/','') : 'Instagram storyteller';
+
+      // show
+      document.body.style.overflow = 'hidden';
+      detailPopup.classList.add('show');
+      detailPopup.setAttribute('aria-hidden','false');
+      detailClose.focus();
+      document.addEventListener('keydown', escListener);
+    }
+
+    function closeDetail(){
+      document.removeEventListener('keydown', escListener);
+      detailPopup.classList.remove('show');
+      detailPopup.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+      detailImg.src = '';
+    }
+
+    function escListener(e){ if(e.key === 'Escape') closeDetail(); }
+
+    // overlay click to close
+    detailPopup.addEventListener('click', (e) => { if(e.target === detailPopup) closeDetail(); });
+    detailClose.addEventListener('click', closeDetail);
+
+    // form upload
+    const form = document.getElementById('storyForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = form.title.value.trim();
+      const text = form.story.value.trim();
+      const imageUrl = form.imageUrl.value.trim() || 'https://placehold.co/800x600';
+      const id = crypto?.randomUUID?.() || 's' + Date.now();
+      // fixed: use valid regex to replace newlines when creating excerpt
+      const excerpt = text.substring(0,120).replace(/\n/g,' ') + '...';
+
+      stories.push({id, title, author:'Anon', img:imageUrl, excerpt, text, instagram:''});
+      renderStories();
+      form.reset();
+      // scroll to top so user sees new story at front
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+
+    // profile instagram quick edit: click to prompt username (for convenience)
+    const profileInstagram = document.getElementById('profileInstagram');
+    profileInstagram.addEventListener('click', (e) => {
+      e.preventDefault();
+      const input = prompt('Masukkan username Instagram (tanpa @), kosongkan untuk hapus:','');
+      if(input === null) return; // cancel
+      const username = input.trim();
+      if(username){
+        profileInstagram.href = 'https://instagram.com/' + username;
+        profileInstagram.querySelector('span').textContent = '@' + username;
+      } else {
+        profileInstagram.href = '#';
+        profileInstagram.querySelector('span').textContent = '@instagram';
+      }
+    });
+
+    // dark toggle
+    const toggle = document.getElementById('toggleDark');
+    toggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const pressed = document.body.classList.contains('dark');
+      toggle.setAttribute('aria-pressed', String(pressed));
+      toggle.textContent = pressed ? 'Light' : 'Dark';
+    });
+
+    // initial render
+    renderStories();
+
+    // notes: for scaling, move `stories` to a JSON file or DB (Supabase/Firebase), add paging and search
+  </script>
+</body>
+</html>
